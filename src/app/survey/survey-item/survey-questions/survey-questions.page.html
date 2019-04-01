@@ -1,0 +1,40 @@
+<ion-header>
+    <ion-toolbar>
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/survey/0"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Survey Questions</ion-title>
+      <ion-buttons slot="primary">
+        <ion-button color="primary" fill="clear" (click)="onSubmit()" [disabled]="isDone">{{ answerForm.valid? 'Submit' : 'Save'}}</ion-button>
+      </ion-buttons>
+    </ion-toolbar>
+  </ion-header>
+
+<ion-content>
+    <form [formGroup]="answerForm">
+      <ion-grid>
+        <ion-list formArrayName="answers">
+          <div *ngFor="let question of survey.questions; let q = index">
+            <ion-row>
+              <ion-col size-sm="8" offset-sm="1">
+                <ion-item>
+                  <p>{{ question.questionTitle }}</p>
+                </ion-item>
+              </ion-col>
+            </ion-row>
+            <ion-row padding-horizontal padding-bottom>
+              <ion-col size-sm="8" offset-sm="1">
+                <ion-radio-group [formControlName]="q" >
+                  <ion-item lines="none" *ngFor="let choice of question.questionChoices">
+                    <ion-label>{{ choice }}</ion-label>
+                    <ion-radio slot="start" [value]="choice"></ion-radio>
+                  </ion-item>
+                </ion-radio-group> 
+              </ion-col>
+            </ion-row>
+          </div>
+        </ion-list>
+      </ion-grid>
+    </form>
+  
+  </ion-content>

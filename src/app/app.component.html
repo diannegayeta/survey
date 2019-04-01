@@ -1,3 +1,34 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <ion-menu side="start">
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>
+          Survey
+        </ion-title>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <ion-menu-toggle>
+        <ion-list margin-vertical>
+          <ion-item lines="none" routerLink='/survey'>
+            <ion-icon name="list" slot="start"></ion-icon>
+            <ion-label>My Survey</ion-label>
+          </ion-item>
+          <ion-item lines="none" routerLink="/bookings">
+            <ion-icon name="checkbox-outline" slot="start"></ion-icon>
+            <ion-label>Reports</ion-label>
+          </ion-item>       
+          <ion-item lines="none" routerLink="/bookings">
+            <ion-icon name="add" slot="start"></ion-icon>
+            <ion-label>Admin user</ion-label>
+          </ion-item>       
+        </ion-list>
+        <ion-item lines="none" (click)="onLogout()" button>
+          <ion-icon name="exit" slot="start"></ion-icon>
+          <ion-label>Logout</ion-label>
+        </ion-item>
+      </ion-menu-toggle>
+    </ion-content>
+  </ion-menu>
+  <ion-router-outlet main></ion-router-outlet>
 </ion-app>
