@@ -1,21 +1,59 @@
+import * as firebase from 'firebase/app';
+import 'firebase/auth';
+import { Router } from '@angular/router';
 import { Injectable } from '@angular/core';
+import { Subject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private _userIsAuthenticated = true;
 
-  get userIsAuthenticated() {
-    return this._userIsAuthenticated;
-  }
-  constructor() { }
+    token: string;
+    errorMessage = new Subject<string>();
 
-  login() {
-    this._userIsAuthenticated = true;
-  }
+    constructor(private router: Router) {};
 
-  logout() {
-    this._userIsAuthenticated = false;
-  }
+    signupUser(email: string, password: string) {
+        firebase.auth().createUserWithEmailAndPassword(email, password)
+        .then(
+            response => {
+                console.log(response)
+                this.signinUser(email, password);
+            }
+        )
+        .catch(
+            error => {
+            console.log(error.message)
+            this.errorMessage.next(error.message)
+            }
+        )
+    }
+
+    signinUser(email: string, password: string) {
+        firebase.auth().signInWithEmailAndPassword(email, password)
+        .then(
+            response => {
+                this.router.navigate(['/survey']);
+                firebase.auth().currentUser.getIdToken()
+                    .then(
+                        (token: string) => this.token = token
+                    )
+            }
+        )
+        .catch(
+            error => this.errorMessage.next(error.message)
+        );
+    }
+
+    logout() {
+        firebase.auth().signOut();
+        this.token = null;
+        this.router.navigate(['/auth']);
+    }
+
+    isAuthenticated() {
+        return this.token != null;
+    }
+
 }

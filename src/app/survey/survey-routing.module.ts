@@ -5,6 +5,7 @@ import { SurveyPage } from './survey.page';
 
 const routes: Routes = [
   {path: '', children: [
+    {path: '', component: SurveyPage},
     
     {path: 'new', children: [
       {path: '', loadChildren: './survey-edit/survey-edit.module#SurveyEditPageModule'},
@@ -16,11 +17,10 @@ const routes: Routes = [
       {path: ':surveyId', loadChildren: './survey-edit/survey-edit.module#SurveyEditPageModule'},
     ]},
     
-    {path: ':userId', children: [
-      {path: '', component: SurveyPage},
-      {path: 'questions/:surveyId', loadChildren: './survey-item/survey-questions/survey-questions.module#SurveyQuestionsPageModule' },
-      {path: ':surveyId', loadChildren: './survey-item/survey-item.module#SurveyItemPageModule'},
-    ]}
+    // {path: ':userId', children: [
+    //   {path: 'questions/:surveyId', loadChildren: './survey-item/survey-questions/survey-questions.module#SurveyQuestionsPageModule' },
+    //   {path: ':surveyId', loadChildren: './survey-item/survey-item.module#SurveyItemPageModule'},
+    // ]}
     
   ]},
 

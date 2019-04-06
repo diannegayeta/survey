@@ -3,15 +3,15 @@
       <ion-buttons slot="start">
         <ion-back-button defaultHref="/survey/0"></ion-back-button>
       </ion-buttons>
-      <ion-title>Survey Questions</ion-title>
+      <ion-title>Questions</ion-title>
       <ion-buttons slot="primary">
-        <ion-button color="primary" fill="clear" (click)="onSubmit()" [disabled]="isDone">{{ answerForm.valid? 'Submit' : 'Save'}}</ion-button>
+        <ion-button color="primary" fill="clear" (click)="onSubmit()" [disabled]="!answerForm.valid" *ngIf="user">Submit</ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
 
 <ion-content>
-    <form [formGroup]="answerForm">
+    <form [formGroup]="answerForm" *ngIf="user">
       <ion-grid>
         <ion-list formArrayName="answers">
           <div *ngFor="let question of survey.questions; let q = index">

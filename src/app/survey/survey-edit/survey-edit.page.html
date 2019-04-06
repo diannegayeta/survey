@@ -1,7 +1,7 @@
 <ion-header>
     <ion-toolbar>
       <ion-buttons slot="start">
-        <ion-back-button defaultHref="/"></ion-back-button>
+        <ion-back-button defaultHref="/survey"></ion-back-button>
       </ion-buttons>
       <ion-title>Survey</ion-title>
       <ion-buttons slot="primary">
@@ -25,7 +25,7 @@
           <ion-col size-sm="6" offset-sm="3">
             <ion-item>
               <ion-label position="floating">Short Description</ion-label>
-              <ion-textarea formControlName="description" rows="3"></ion-textarea>
+              <ion-input type="text" formControlName="description" rows="2"></ion-input>
             </ion-item>
           </ion-col>
         </ion-row>
@@ -33,13 +33,13 @@
             <ion-col size-sm="3" offset-sm="3">
               <ion-item>
                 <ion-label position="floating">Available from</ion-label>
-                <ion-datetime formControlName="dateFrom" display-format="MMM DD, YYYY HH:mm A"></ion-datetime>
+                <ion-datetime formControlName="dateFrom" placeholder="MMM/DD/YYYY HH:MM" [min]="minDate" [max]="maxDate" display-format="MMM DD, YYYY HH:mm A"></ion-datetime>
               </ion-item>
             </ion-col>
             <ion-col size-sm="3">
               <ion-item>
                 <ion-label position="floating">Available to</ion-label>
-                <ion-datetime formControlName="dateTo" display-format="MMM DD, YYYY HH:mm A"></ion-datetime>
+                <ion-datetime formControlName="dateTo" placeholder="MMM/DD/YYYY HH:MM" [min]="minDate" [max]="maxDate" display-format="MMM DD, YYYY HH:mm A"></ion-datetime>
               </ion-item>
             </ion-col>
           </ion-row>
@@ -53,9 +53,15 @@
         </ion-row>
         <ion-row>
           <ion-col size-sm="6" offset-sm="3">
-            <ion-item>
+            <ion-item lines="none">
               <ion-img [src]="imagePath.value" alt="Survey Photo" ></ion-img>
             </ion-item>
+          </ion-col>
+        </ion-row>
+        <ion-row>
+          <ion-col size-sm="6" offset-sm="3">
+            <ion-button padding color="success" (click)='onSave()'>Save</ion-button>
+            <ion-button padding color="danger" (click)='onReset()'>Reset</ion-button>
           </ion-col>
         </ion-row>
       </ion-grid>

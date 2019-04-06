@@ -1,75 +1,51 @@
-import { Component, OnInit } from '@angular/core';
-import { SegmentChangeEventDetail } from '@ionic/core';
-import { IonItemSliding, NavController } from '@ionic/angular';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Component, OnDestroy } from '@angular/core';
+import { IonItemSliding, NavController, AlertController } from '@ionic/angular';
 import { Subscription } from 'rxjs';
 
 import { Survey } from '../models/survey.model';
 import { SurveyService } from './survey.service';
 import { User } from '../models/user.model';
-import { UserService } from './survey-item/user.service';
+import { UserService } from '../users/user.service';
+import { UsersPage } from '../users/users.page';
 
 @Component({
   selector: 'app-survey',
   templateUrl: './survey.page.html',
   styleUrls: ['./survey.page.scss'],
 })
-export class SurveyPage implements OnInit {
-  // isValid = false;
+export class SurveyPage implements OnDestroy {
   isAdmin = true;
-  user: User;
+  users: User[];
   userId: number;
   surveys: Survey[];
-  validSurvey: Survey[] = [];
+  surveySub: Subscription;
   subscription: Subscription;
-  currDate = new Date().getTime();
 
   constructor(
     private navCtrl: NavController,
-    private activatedRoute: ActivatedRoute,
     private surveyService: SurveyService,
-    private userService: UserService) { }
+    private userService: UserService,
+    private alertCtrl: AlertController
+  ) { }
 
-  ngOnInit() {
+  ionViewDidEnter() {
     this.getSurveyList();
-    this.activatedRoute.paramMap.subscribe(
-      paramMap => {
-        if (!paramMap.has('userId')) {
-          this.navCtrl.navigateBack('/auth');
-          return;
-        }
-        this.userId = +paramMap.get('userId');
-        this.getUser();
-      }
-    );
-  }
-
-  getUser() {
-    this.userService.getUser(this.userId).subscribe(
-      user => this.user = user
-    );
+    this.getUsers();
   }
 
   getSurveyList() {
-    this.subscription = this.surveyService.surveys.subscribe(
-      surveys => this.surveys = surveys
-    );
-    this.validSurvey = this.surveys;
+    this.subscription = this.surveyService.getSurveys().subscribe(
+      (surveys: Survey[]) => {
+        this.surveys = surveys;
+    });
   }
 
-  onFilterUpdate(event: CustomEvent<SegmentChangeEventDetail>) {
-    switch(event.detail.value){
-      case 'all':       this.filterValidSurvey();
-                        console.log(this.validSurvey);
-                        break;
-      case 'inProgress': this.filterInProgressSurvey();
-                        console.log('inProgress');
-                        break;
-      case 'completed':
-                        this.filterCompletedSurvey();
-                        console.log('completed');
-                        break;
-    }
+  getUsers() {
+    this.subscription = this.userService.getUsers().subscribe(
+      (users: User[]) => {
+        this.users = users;
+      }
+    );
   }
 
   onEdit(id: string, slidingItem: IonItemSliding) {
@@ -77,45 +53,75 @@ export class SurveyPage implements OnInit {
     this.navCtrl.navigateForward(`/survey/edit/${id}`);
   }
 
-  onDeleteSurvey(id: number) {
-    this.surveyService.deleteSurvey(id).subscribe(
-      (error) => console.log(error)
+  deleteSurvey(surveyId: number) {
+    this.subscription = this.surveyService.deleteSurvey(surveyId).subscribe(
+      () => {
+        this.getSurveyList();
+      }
     );
+    this.deleteUserSurvey(surveyId);
   }
 
-  filterValidSurvey() {
-    this.validSurvey = [];
-    this.surveys.forEach(s => {
-      if (s) {
-        const dateFrom = new Date(s.dateFrom).getTime();
-        const dateTo = new Date(s.dateTo).getTime();
-        if (dateFrom <= this.currDate && dateTo >= this.currDate) {
-          this.validSurvey.push(s);
-        } else {
-          this.validSurvey.push(null);
+  deleteUserSurvey(surveyId: number) {
+    for (let i = 0; i < this.userService.userLength; i++) {
+      this.subscription = this.userService.deleteUserSurvey(i, surveyId).subscribe(
+        error => console.log(error)
+      );
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
+  }
+
+  onDeleteSurvey(surveyId: number, slidingItem: IonItemSliding) {
+    slidingItem.close();
+    this.alertCtrl.create({
+      header: 'Are you sure?',
+      message: `Do you really want to delete ${this.surveys[surveyId].title} survey?`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Delete',
+          handler: () => {
+            this.deleteSurvey(surveyId);
+          }
         }
-      } else {
-        this.validSurvey.push(null);
-      }
-    });
-    this.surveys = this.validSurvey;
+      ]
+    }).then(alertEl => alertEl.present());
   }
 
-  filterCompletedSurvey() {
-    this.validSurvey = [];
-    this.user.survey.forEach((s, i) => {
-      if (s.surveyFlag === true) {
-        this.validSurvey.push(this.surveys[i]);
-      }
-    });
+  onSend(surveyId: number, slidingItem: IonItemSliding) {
+    slidingItem.close();
+    this.alertCtrl.create({
+      header: `${this.surveys[surveyId].title}`,
+      message: `This survey will be sent to all participants`,
+      buttons: [
+        {
+          text: 'Cancel',
+          role: 'cancel'
+        },
+        {
+          text: 'Continue',
+          handler: () => {
+            this.sendSurvey(surveyId);
+          }
+        }
+      ]
+    }).then(alertEl => alertEl.present());
   }
 
-  filterInProgressSurvey() {
-    this.validSurvey = [];
-    this.user.survey.forEach((s, i) => {
-      if (s.surveyFlag === false) {
-        this.validSurvey.push(this.surveys[i]);
+  sendSurvey(surveyId: number) {
+    this.users.forEach((user, i) => {
+      if (user) {
+          console.log(`Sending email to ${user.email} with http://localhost:8100/userSurvey/${i}/${surveyId} link`)
       }
     });
+
   }
 }

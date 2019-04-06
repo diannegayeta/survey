@@ -3,7 +3,7 @@
     <ion-header>
       <ion-toolbar>
         <ion-title>
-          Survey
+          Admin
         </ion-title>
       </ion-toolbar>
     </ion-header>
@@ -11,16 +11,16 @@
       <ion-menu-toggle>
         <ion-list margin-vertical>
           <ion-item lines="none" routerLink='/survey'>
-            <ion-icon name="list" slot="start"></ion-icon>
+            <ion-icon name="checkbox-outline" slot="start"></ion-icon>
             <ion-label>My Survey</ion-label>
           </ion-item>
-          <ion-item lines="none" routerLink="/bookings">
-            <ion-icon name="checkbox-outline" slot="start"></ion-icon>
+          <ion-item lines="none" routerLink="/reports">
+            <ion-icon name="list" slot="start"></ion-icon>
             <ion-label>Reports</ion-label>
           </ion-item>       
-          <ion-item lines="none" routerLink="/bookings">
+          <ion-item lines="none" routerLink="/users">
             <ion-icon name="add" slot="start"></ion-icon>
-            <ion-label>Admin user</ion-label>
+            <ion-label>Participant</ion-label>
           </ion-item>       
         </ion-list>
         <ion-item lines="none" (click)="onLogout()" button>

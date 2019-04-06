@@ -5,25 +5,25 @@
   </ion-header>
   
   <ion-content padding>
-    <form>
+    <form [formGroup]="signinForm" (ngSubmit)="(onSubmit())"> 
       <ion-grid>
         <ion-row>
-          <ion-col size-sm="6" offset-sm="3">
+          <ion-col size-sm="6" size-lg="4" offset-sm="3" offset-lg="4">
             <ion-list>
               <ion-item>
                 <ion-label position="floating">Email</ion-label>
-                <ion-input></ion-input>
+                <ion-input type="email" formControlName="email"></ion-input>
               </ion-item>
               <ion-item>
                 <ion-label position="floating">Password</ion-label>
-                <ion-input></ion-input>
+                <ion-input type="password" formControlName="password"></ion-input>
               </ion-item>
             </ion-list>
           </ion-col>
         </ion-row>
         <ion-row>
-          <ion-col size-sm="6" offset-sm="3">
-            <ion-button type="button" color="primary" fill="clear" expand="block"> Swith to Signup </ion-button>
+          <ion-col size-sm="6" size-lg="4" offset-sm="3" offset-lg="4">
+            <ion-text color="danger" *ngIf="errorMessage" id="errorMessage">{{errorMessage}}</ion-text>
             <ion-button type="submit" color="primary" expand="block">Login</ion-button>
           </ion-col>
         </ion-row>

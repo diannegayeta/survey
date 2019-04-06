@@ -11,10 +11,10 @@ export class AuthGuard implements CanLoad {
   constructor(private authService: AuthService, private router: Router) {}
   
   canLoad(route: Route, segments: UrlSegment[]) {
-    if (!this.authService.userIsAuthenticated) {
+    if (!this.authService.isAuthenticated()) {
       this.router.navigate(['/auth'])
     }
-    return this.authService.userIsAuthenticated;
+    return this.authService.isAuthenticated();
   }
 
 }

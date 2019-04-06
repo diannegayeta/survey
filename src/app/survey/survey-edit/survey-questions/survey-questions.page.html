@@ -5,39 +5,40 @@
       </ion-buttons>
       <ion-title>Survey Questionnaire</ion-title>
       <ion-buttons slot="primary">
-        <ion-button color="primary" fill="clear" (click)="onSave()">Save</ion-button>
+        <ion-button color="primary" fill="clear" (click)="onSave()" [disabled]="!questionForm.valid" *ngIf="survey">Save</ion-button>
       </ion-buttons>
     </ion-toolbar>
   </ion-header>
   
   <ion-content>
-    <form [formGroup]="questionForm">
+    <form [formGroup]="questionForm" *ngIf="survey">
       <ion-grid>
         <ion-list formArrayName="questions">
           <div *ngFor="let question of getQuestionsControls(); let q = index" [formGroupName]="q">
             <ion-row>
-              <ion-col size-sm="8" offset-sm="1">
+              <ion-col size-sm="8" offset-sm="2">
                 <ion-item>
                   <!-- <ion-label position="floating">Question1</ion-label> -->
                   <ion-textarea placeholder="Question" formControlName="questionTitle"></ion-textarea>
-                  <ion-icon slot="end" color="danger" name="trash" (click)="onDeleteQuestion(q)"></ion-icon>
-                </ion-item>
+                  <ion-icon slot="end" color="danger" name="trash" (click)="onDeleteQuestion(q)" *ngIf="q !== 0"></ion-icon>
+                </ion-item>    
               </ion-col>
             </ion-row>
             <ion-row padding-horizontal formArrayName="questionChoices">
-              <ion-col size-sm="8" offset-sm="1">
+              <ion-col size-sm="8" offset-sm="2">
                 <ion-item lines="none" *ngFor="let choice of getChoiceControls(question); let c = index">
                   <!-- <ion-label position="floating">choice1</ion-label> -->
                   <ion-input placeholder="Add choice item here" [formControlName]="c"></ion-input>
-                  <ion-icon slot="end" color="danger" name="close" size="small" (click)="onDeleteChoice(question,c)"></ion-icon>
+                  <ion-icon slot="end" color="danger" name="close" size="small" (click)="onDeleteChoice(question,c)" *ngIf="c !== 0"></ion-icon>
                 </ion-item>
                 <ion-button color="primary" fill="clear" (click)="onAddChoice(question)">Add Choices</ion-button>
               </ion-col>
             </ion-row>
           </div>
           <ion-row>
-            <ion-col size-sm="8" offset-sm="1">
+            <ion-col size-sm="8" offset-sm="2">
               <ion-button padding-horizontal color="primary" (click)="onAddQuestion()">Add Question</ion-button>
+              <ion-button padding-horizontal color="danger" (click)='onReset()'>Reset</ion-button>
             </ion-col>
           </ion-row>
         </ion-list>

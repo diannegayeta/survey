@@ -11,82 +11,29 @@ import { HttpClient } from '@angular/common/http';
 })
 export class SurveyService {
   survey: Survey;
-  private _surveys = new BehaviorSubject<Survey[]>([
-    new Survey(
-      'Survey1',
-      'Survey1 description',
-      '2019-04-16T18:30:00+08:00',
-      '2019-04-17T09:30:00+08:00',
-      'https://images.techhive.com/images/article/2014/05/red-question-mark-165419798-100265543-primary.idge.jpg',
-      [
-        new Question(
-          'Suervey 1 Question 1, What is Question1?',
-          [
-            'yes',
-            'no',
-            'maybe'
-          ]),
-        new Question(
-          'Survey 1 Question 2, What is Question2?',
-          [
-            'left',
-            'right',
-          ])
-      ]
-    ),
-    new Survey(
-      'Survey2',
-      'Survey2 description',
-      '2019-03-01T16:30:00+08:00',
-      '2019-04-05T10:30:00+08:00',
-      'https://www.churchtimes.co.uk/media/5604506/out-of-the-question.jpg?anchor=center&mode=crop&width=605&height=292&rnd=131457274530000000',
-      [
-        new Question(
-          'What is Question1?',
-          [
-            'left',
-            'right',
-            'center'
-          ]),
-        new Question(
-          'What is Question2?',
-          [
-            'yes',
-            'no',
-            'maybe',
-            'no comment'
-          ]),
-        new Question(
-          'Suervey 2 Question 3, What is Question1?',
-          [
-            'yes',
-            'no',
-            'maybe'
-          ]),
-        new Question(
-          'Survey 12 Question 4, What is Question2?',
-          [
-            'left',
-            'right',
-          ])
-      ]
-    ),
-
-  ]);
-
-  get surveys() {
-    return this._surveys.asObservable();
-  }
+  surveyLenght = 0;
 
   constructor(private httpClient: HttpClient) { }
 
+  getSurveys() {
+    return this.httpClient.get<Survey[]>(`https://ng-http-9356b.firebaseio.com/survey.json` )
+    .pipe(map(
+        (survey: Survey[]) => {
+          if (survey) {
+            this.surveyLenght = survey.length;
+          }
+          return survey;
+        }
+    ));
+  }
+
   getSurvey(id: number) {
-    return this.surveys.pipe(
-      take(1),
-      map(surveys => {
-        return { ...surveys[id] };
-      })
-    );
+    return this.httpClient.get<Survey>(`https://ng-http-9356b.firebaseio.com/survey/${id}.json` )
+    .pipe(map(
+        (survey: Survey) => {
+          return survey;
+        }
+    ));
   }
 
   setSurvey(survey) {
@@ -94,31 +41,15 @@ export class SurveyService {
   }
 
   updateSurvey(id: number, survey: Survey) {
-    console.log('edited survey', survey)
-    return this.surveys.pipe(
-      take(1),
-      map(surveys => {
-        surveys[id] = survey;
-      })
-    );
-  } 
+    return this.httpClient.put<Survey>(`https://ng-http-9356b.firebaseio.com/survey/${id}.json`, survey)
+  }
 
   deleteSurvey(id: number) {
-    return this.surveys.pipe(
-      take(1),
-      map(surveys => {
-        surveys.splice(id, 1);
-      })
-    );
+    return this.httpClient.delete<Survey>(`https://ng-http-9356b.firebaseio.com/survey/${id}.json`)
   }
 
   addSurvey(survey: Survey) {
-    return this.surveys.pipe(
-      take(1),
-      map(surveys => {
-        surveys.push(survey);
-      })
-    );
+    return this.httpClient.put<Survey>(`https://ng-http-9356b.firebaseio.com/survey/${this.surveyLenght}.json`, survey)
   }
 
 }

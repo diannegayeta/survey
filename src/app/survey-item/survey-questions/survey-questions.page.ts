@@ -1,11 +1,13 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { SurveyService } from '../../survey.service';
-import { Survey } from 'src/app/models/survey.model';
 import { FormArray, FormGroup, FormControl, Validators} from '@angular/forms';
-import { UserService } from '../user.service';
+import { NavController } from '@ionic/angular';
+import { Survey } from 'src/app/models/survey.model';
 import { User } from 'src/app/models/user.model';
 import { UserSurvey } from 'src/app/models/userSurvey.model';
+import { SurveyService } from 'src/app/survey/survey.service';
+import { UserService } from 'src/app/users/user.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-survey-questions',
@@ -13,12 +15,13 @@ import { UserSurvey } from 'src/app/models/userSurvey.model';
   styleUrls: ['./survey-questions.page.scss'],
 })
 
-export class SurveyQuestionsPage implements OnInit {
+export class SurveyQuestionsPage implements OnInit, OnDestroy {
   user: User;
   survey: Survey;
   surveyId: number;
   userId: number;
   answerForm: FormGroup;
+  subscription: Subscription;
   answerArray = new FormArray([]);
   isDone = false;
   isUserSurvey = false;
@@ -28,6 +31,7 @@ export class SurveyQuestionsPage implements OnInit {
     private activatedRoute: ActivatedRoute,
     private surveyService: SurveyService,
     private userService: UserService,
+    private navCtrl: NavController
   ) { }
 
   ngOnInit() {
@@ -37,7 +41,6 @@ export class SurveyQuestionsPage implements OnInit {
           this.surveyId = +paramMap.get('surveyId');
           this.userId = +paramMap.get('userId');
           this.getUserandSurvey();
-          this.getUserSurvey();
           this.initForm();
         }
       }
@@ -45,17 +48,26 @@ export class SurveyQuestionsPage implements OnInit {
   }
 
   getUserandSurvey() {
-    this.surveyService.getSurvey(this.surveyId).subscribe(
-      survey => this.survey = survey
+    this.subscription = this.surveyService.getSurvey(this.surveyId).subscribe(
+      survey => {
+        this.survey = survey;
+        this.getUser();
+      }
     );
-    this.userService.getUser(this.userId).subscribe(
-      user => this.user = user
+  }
+
+  getUser() {
+    this.subscription = this.userService.getUser(this.userId).subscribe(
+      user => {
+        this.user = user
+        this.getUserSurvey()
+      }
     );
   }
 
   getUserSurvey() {
-    const userSurvey = this.user.survey[this.surveyId];
-    if (userSurvey) {
+    const userSurvey = this.user.survey[this.surveyId]
+    if (userSurvey && userSurvey.answers) {
       this.isUserSurvey = true;
       this.isDone = userSurvey.surveyFlag;
       userSurvey.answers.forEach(answer => {
@@ -64,14 +76,15 @@ export class SurveyQuestionsPage implements OnInit {
     } else {
       this.survey.questions.forEach(el => {
         this.pushFormValue(null);
-      })
+      });
+      // this.user.survey[this.surveyId].surveyFlag = false;
     }
   }
 
   pushFormValue(answer: string) {
     this.answerArray.push(
       new FormControl(answer, [Validators.required])
-    )
+    );
   }
 
   initForm() {
@@ -88,22 +101,27 @@ export class SurveyQuestionsPage implements OnInit {
     } else {
       this.createNewUserSurvey();
     }
+    this.updateUser();
   }
 
   createNewUserSurvey() {
     const newSurvey = new UserSurvey(
       this.answerForm.valid,
       (<FormArray>this.answerForm.get('answers')).value
-    )
-    this.user.survey[this.surveyId] = newSurvey;
+      );
+      this.user.survey[this.surveyId] = newSurvey;
   }
 
-  onUpdateUser() {
-    this.userService.updateUser(this.userId, this.user).subscribe(
-      error => {
-        return console.log(error);
-      }
-    )
+  updateUser() {
+      this.subscription = this.userService.updateUser(this.userId, this.user).subscribe(
+        () => this.navCtrl.navigateBack(`/userSurvey/${this.userId}/${this.surveyId}`)
+    );
+  }
+
+  ngOnDestroy() {
+    if (this.subscription) {
+      this.subscription.unsubscribe()
+    }
   }
 
 }

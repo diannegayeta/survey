@@ -15,9 +15,12 @@ import { Subscription } from 'rxjs';
 export class SurveyEditPage implements OnInit, OnDestroy {
   surveyForm: FormGroup;
   subscription: Subscription;
+  minDate: string;
+  maxDate: string;
   survey: Survey;
   id: number;
   editMode = false;
+  currDate = new Date().getTime();
 
   constructor(
     private activatedRoute: ActivatedRoute,
@@ -26,64 +29,59 @@ export class SurveyEditPage implements OnInit, OnDestroy {
     ) { }
 
   ngOnInit() {
+      this.initForm();
+      this.getDate();
+      this.getSurveyId();
+  }
+
+  initForm() {
+    this.surveyForm = new FormGroup({
+      title: new FormControl(null, [Validators.required]),
+      description: new FormControl(null, [Validators.required, Validators.maxLength(180)]),
+      dateFrom: new FormControl(null, [Validators.required]),
+      dateTo: new FormControl(null, [Validators.required]),
+      imgUrl: new FormControl(null, [Validators.required]),
+    });
+  }
+
+  getDate() {
+    const currDate = new Date();
+    this.minDate = currDate.toISOString();
+    this.maxDate = new Date(currDate.setFullYear(currDate.getFullYear() + 1)).toISOString();
+  }
+
+  getSurveyId() {
     this.activatedRoute.paramMap.subscribe(
       paramMap => {
         if (paramMap.has('surveyId')) {
-          this.editMode = true;
-          this.id = +paramMap.get('surveyId')
-          this.subscription = this.surveyService.getSurvey(this.id).subscribe(
-            survey => {
-              this.survey = survey;
-            }
-          );
+        this.editMode = true;
+        this.id = +paramMap.get('surveyId');
+        this.getSurvey();
         }
-        this.initForm();
       }
     );
   }
 
-  initForm() {
-    let surveyTitle = '';
-    let surveyDescription = '';
-    let surveyDateFrom = '';
-    let surveyDateTo = '';
-    let surveyImgUrl = '';
+  getSurvey() {
+    this.subscription = this.surveyService.getSurvey(this.id).subscribe(
+      survey => {
+        this.survey = survey;
+        this.setpatch();
+      }
+    );
+  }
 
-    if (this.editMode) {
-      surveyTitle = this.survey.title;
-      surveyDescription = this.survey.description;
-      surveyDateFrom = this.survey.dateFrom;
-      surveyDateTo = this.survey.dateTo;
-      surveyImgUrl = this.survey.imgUrl;
-    }
-
-    this.surveyForm = new FormGroup({
-      title: new FormControl(surveyTitle, {
-        updateOn: 'blur',
-        validators: [Validators.required]
-      }),
-      description: new FormControl(surveyDescription, {
-        updateOn: 'blur',
-        validators: [Validators.required, Validators.maxLength(180)]
-      }),
-      dateFrom: new FormControl(surveyDateFrom, {
-        updateOn: 'blur',
-        validators: [Validators.required]
-      }),
-      dateTo: new FormControl(surveyDateTo, {
-        updateOn: 'blur',
-        validators: [Validators.required]
-      }),
-      imgUrl: new FormControl(surveyImgUrl, {
-        updateOn: 'blur',
-        validators: [Validators.required]
-      }),
+  setpatch() {
+    this.surveyForm.patchValue({
+      title: this.survey.title,
+      description: this.survey.description,
+      dateFrom: this.survey.dateFrom,
+      dateTo: this.survey.dateTo,
+      imgUrl: this.survey.imgUrl
     });
   }
 
   onNext() {
-    this.setValue();
-    console.log(this.survey)
     if (this.editMode) {
       this.navCtrl.navigateForward(`/survey/edit/questions/${this.id}`);
     } else {
@@ -91,21 +89,33 @@ export class SurveyEditPage implements OnInit, OnDestroy {
     }
   }
 
-  setValue() {
+  onReset() {
+    this.editMode? this.getSurvey() : this.surveyForm.reset();
+  }
+
+  onSave() {
     if (this.editMode) {
       const question = this.survey.questions;
       this.survey = this.surveyForm.value;
       this.survey.questions = question;
+      this.updateSurvey();
     } else {
       this.survey = this.surveyForm.value;
       this.survey.questions = [];
+      this.surveyService.survey = this.survey;
     }
-    this.surveyService.survey = this.survey;
+  }
+
+  updateSurvey() {
+    this.surveyService.updateSurvey(this.id, this.survey).subscribe(
+      () => this.getSurvey()
+    );
   }
 
   ngOnDestroy() {
-    console.log('ondestroy');
-    // this.subscription.unsubscribe()
+    if (this.subscription) {
+      this.subscription.unsubscribe();
+    }
   }
 
 }
