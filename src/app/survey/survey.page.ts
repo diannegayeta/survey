@@ -119,7 +119,7 @@ export class SurveyPage implements OnDestroy {
   sendSurvey(surveyId: number) {
     this.users.forEach((user, i) => {
       if (user) {
-          console.log(`Sending email to ${user.email} with http://localhost:8100/userSurvey/${i}/${surveyId} link`)
+          console.log(`Email sent to ${user.email} with http://localhost:8100/userSurvey/${i}/${surveyId} link`)
       }
     });
 

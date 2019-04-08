@@ -95,7 +95,7 @@ export class SurveyQuestionsPage implements OnInit, OnDestroy {
 
   onSubmit() {
     if (this.isUserSurvey) {
-      if (this.user.survey[this.surveyId].surveyFlag) {return; }
+      // if (this.user.survey[this.surveyId].surveyFlag) {return; }
       this.user.survey[this.surveyId].surveyFlag = this.answerForm.valid;
       this.user.survey[this.surveyId].answers = (<FormArray>this.answerForm.get('answers')).value;
     } else {
@@ -114,7 +114,10 @@ export class SurveyQuestionsPage implements OnInit, OnDestroy {
 
   updateUser() {
       this.subscription = this.userService.updateUser(this.userId, this.user).subscribe(
-        () => this.navCtrl.navigateBack(`/userSurvey/${this.userId}/${this.surveyId}`)
+        () => {
+          console.log(`Email sent to ${this.user.email} with "You have completed ${this.survey.title} survey"`);
+          this.navCtrl.navigateBack(`/userSurvey/${this.userId}/${this.surveyId}`);
+        }
     );
   }
 

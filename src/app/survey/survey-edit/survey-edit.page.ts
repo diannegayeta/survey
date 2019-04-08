@@ -85,6 +85,9 @@ export class SurveyEditPage implements OnInit, OnDestroy {
     if (this.editMode) {
       this.navCtrl.navigateForward(`/survey/edit/questions/${this.id}`);
     } else {
+      this.survey = this.surveyForm.value;
+      this.survey.questions = [];
+      this.surveyService.survey = this.survey;
       this.navCtrl.navigateForward(`/survey/new/questions`);
     }
   }
