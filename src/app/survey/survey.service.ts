@@ -16,15 +16,15 @@ export class SurveyService {
   constructor(private httpClient: HttpClient) { }
 
   getSurveys() {
-    return this.httpClient.get<Survey[]>(`https://ng-http-9356b.firebaseio.com/survey.json` )
-    .pipe(map(
-        (survey: Survey[]) => {
-          if (survey) {
-            this.surveyLenght = survey.length;
-          }
-          return survey;
-        }
-    ));
+    return this.httpClient.get<any>(`https://doc-store-service-uat.apps.eas.pcf.manulife.com/v1/PHL/IEDMS/documents/afb22ed6-ef83-441c-9960-2c672b704804` )
+    // .pipe(map(
+    //     (survey: Survey[]) => {
+    //       if (survey) {
+    //         this.surveyLenght = survey.length;
+    //       }
+    //       return survey;
+    //     }
+    // ));
   }
 
   getSurvey(id: number) {
